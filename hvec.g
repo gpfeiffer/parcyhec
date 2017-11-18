@@ -181,10 +181,10 @@ ProdHVecHVec:= function(l, r)
     for i in [1..Length(r.poss)] do
         prod:= Zero(l.hecke);
         pairs:= AsCombinationOfWords(r.vals[i]);
-        lll:= Length(pairs);
-        if lll > 5 then
-          Print(Length(l.poss), "x", Length(r.poss), "=", Length(pairs), " \c");
-        fi;
+#        lll:= Length(pairs);
+#        if lll > 5 then
+#          Print(Length(l.poss), "x", Length(r.poss), "=", Length(pairs), " \c");
+#        fi;
         for pair in pairs do
             vec:= pair.scalar * l;
 #            vec:= HVecUnderWord(vec, pair.word, l.hecke.mats);

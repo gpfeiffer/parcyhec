@@ -11,6 +11,7 @@ g27log.txt\
 g29log.txt\
 g33log.txt\
 g33d4log.txt\
+g31g423log.txt\
 #g31log.txt\
 
 all: ${LOGS}
@@ -33,10 +34,16 @@ g29log.txt: g29input.g
 g31log.txt: g31input.g
 	${GAP} ${MEM} ${LIB} < $< | tee $@
 
+g31g423log.txt: g31g423input.g
+	${GAP} ${MEM} ${LIB} < $< | tee $@
+
 g33log.txt: g33input.g
 	${GAP} ${MEM} ${LIB} < $< | tee $@
 
 g33d4log.txt: g33d4input.g
+	${GAP} ${MEM} ${LIB} < $< | tee $@
+
+g34g33log.txt: g34g33input.g
 	${GAP} ${MEM} ${LIB} < $< | tee $@
 
 

@@ -117,7 +117,8 @@ HeckeMatrices:= function(W, relations, H1, subset, strategy)
                 return false;
             fi;
         fi;
-        return inverse * (vec + HVec([l], [q*one], zero, hecke))
+#        return inverse * (vec + HVec([l], [q*one], zero, hecke))
+        return HVecScaled(inverse, vec + HVec([l], [q*one], zero, hecke))
                       + HVec([n], [(q-1)*one], zero, hecke);
     end;
 
@@ -138,7 +139,8 @@ HeckeMatrices:= function(W, relations, H1, subset, strategy)
                 return false;
             fi;
         fi;
-        return inverse * (vec + HVec([l], [q*one], zero, hecke));
+#        return inverse * (vec + HVec([l], [q*one], zero, hecke));
+        return HVecScaled(inverse, vec + HVec([l], [q*one], zero, hecke));
     end;
 
     ##  Compute the Matrices
@@ -205,7 +207,8 @@ HeckeMatrices:= function(W, relations, H1, subset, strategy)
                         new:= HVecUnderWord(HVec([n], [one], zero, hecke), v, mmm);
                         if not IsBool(new) then
                             Print("\n", n, ".", s, " = ", n, ".", v, "\n");
-                            mmm[s][n]:= q^(-Number(v, x-> x < 0)) * new;
+#                            mmm[s][n]:= q^(-Number(v, x-> x < 0)) * new;
+                            mmm[s][n]:= HVecScaled(q^(-Number(v, x-> x < 0)), new);
                             cacheVec(mmm[s][n]);
 
                             # check for inverse edge
