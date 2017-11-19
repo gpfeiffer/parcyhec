@@ -81,9 +81,19 @@ HVecOps.\+:= function(l, r)
     return vec;
 end;
 
+# scalar multiplication
+HVecScaled:= function(alpha, vec)
+    if alpha = 0 * alpha then
+        return Zero(vec.hecke);
+    fi;
+    return HVec(Copy(vec.poss), List(vec.vals, x-> alpha * x),
+                vec.zero, vec.hecke);
+end;
+
 # how to subtract
 HVecOps.\-:= function(l, r)
-    return l + (-1)*r;
+#    return l + (-1)*r;
+    return l + HVecScaled(-1, r);
 end;
 
 
@@ -98,7 +108,8 @@ HVecUnderMat:= function(vec, mat)
 #            Print("missing: ", l, ".", i, "\n");
             return false;
         else
-            img:= img + val * mat[pos];
+#            img:= img + val * mat[pos];
+            img:= img + HVecScaled(val, mat[pos]);
         fi;
     od;
     return img;
@@ -116,7 +127,8 @@ HVecUnderWord:= function(vec, word, mmm)
             return false;
         fi;
         if a < 0 then
-            img:= img + (1-q) * vec;
+#            img:= img + (1-q) * vec;
+            img:= img + HVecScaled(1-q, vec);
         fi;
         vec:= img;
     od;
@@ -126,73 +138,26 @@ end;
 
 ##  Multiplication.
 
-# how to turn a HVec into a linear combination of words
-AsCombinationOfWords:= function(vec)
-    local   list,  i;
-    if IsHeckeElt(vec) then
-        list:= [];
-        for i in [1..Length(vec.elm)] do
-            Add(list, rec(
-              scalar:= vec.coeff[i],
-              word:= CoxeterWord(vec.hecke.reflectionGroup, vec.elm[i])
-            ));
-        od;
-        return list;
-    else
-        return vec.operations.AsCombinationOfWords(vec);
-    fi;
-end;
+ProdHVecH:= function(l, r)  ## called if IsHVec(l)
+    local   sum,  W,  i,  w,  prod;
 
-HVecOps.AsCombinationOfWords:= function(self)
-    local   list,  i,  word,  pair;
-    list:= [];
-    for i in [1..Length(self.poss)] do
-        word:= self.hecke.words[self.poss[i]];
-        for pair in AsCombinationOfWords(self.vals[i]) do
-            Add(list, rec(
-              scalar:= pair.scalar,
-              word:= Concatenation(self.hecke.subset{pair.word}, word)
-            ));
-        od;
-    od;
-    return list;
-end;
-
-
-##  HVec * HVec (assuming both l and r lie in the same algebra)
-#ProdHVecHVec:= function(l, r)
-#    local   prod,  pair,  vec;
-#    prod:= Zero(l.hecke);
-#    for pair in AsCombinationOfWords(r) do
-#        vec:= pair.scalar * l;
-#        vec:= HVecUnderWord(vec, pair.word, l.hecke.mats);
-#        prod:= prod + vec;
-#    od;
-#    return prod;
-#end;
-
-
-# h h' = sum_{d in D} (h h_d') T_d
-ProdHVecHVec:= function(l, r)
-    local   sum,  i,  prod,  pairs,  lll,  pair,  vec;
-
-# Print(Length(l.poss), "x", Length(r.poss), " \c");
     sum:= Zero(l.hecke);
-    for i in [1..Length(r.poss)] do
-        prod:= Zero(l.hecke);
-        pairs:= AsCombinationOfWords(r.vals[i]);
-#        lll:= Length(pairs);
-#        if lll > 5 then
-#          Print(Length(l.poss), "x", Length(r.poss), "=", Length(pairs), " \c");
-#        fi;
-        for pair in pairs do
-            vec:= pair.scalar * l;
-#            vec:= HVecUnderWord(vec, pair.word, l.hecke.mats);
-            vec:= HVecUnderWord(vec, r.hecke.subset{pair.word}, l.hecke.mats);
-            prod:= prod + vec;
+    if IsHVec(r) then
+        for i in [1..Length(r.poss)] do
+            prod:= ProdHVecH(l, r.vals[i]);  # recurse
+            w:= r.hecke.words[r.poss[i]];
+            sum:= sum + HVecUnderWord(prod, w, l.hecke.mats);
         od;
-        sum:= sum + HVecUnderWord(prod, r.hecke.words[r.poss[i]], l.hecke.mats);
-    od;
+    elif IsHeckeElt(r) then
+        W:= r.hecke.reflectionGroup;
+        for i in [1..Length(r.elm)] do
+            prod:= r.coeff[i] * l;
+            w:= CoxeterWord(W, r.elm[i]);
+            sum:= sum + HVecUnderWord(prod, l.hecke.subset{w}, l.hecke.mats);
+        od;
+    else # scalar: commute!
+        return r * l;
+    fi;
     return sum;
 end;
 
@@ -202,8 +167,10 @@ HVecOps.\*:= function(l, r)
     # presumably we're called because r is a HVec
     if IsHVec(r) then
         if IsHVec(l) and l.hecke = r.hecke then
-            return ProdHVecHVec(l, r);
-        else
+            return ProdHVecH(l, r);
+        elif l = 0*l then
+            return r.zero;
+        else # scalar
             return HVec(r.poss, List(r.vals, x-> l * x), r.zero, r.hecke);
         fi;
     else

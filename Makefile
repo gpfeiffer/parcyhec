@@ -1,5 +1,5 @@
-GAP=../../gap-64/gap3-jm5/bin/gap.sh64
-#GAP=../../gap-64/gap3-jm5/bin/gap.sh
+#GAP=../../gap-64/gap3-jm5/bin/gap.sh64
+GAP=../../gap-64/gap3-jm/bin/gap.sh
 MEM=-m 4000m
 LIB=hvec.g variants.g parcyhec.g
 
