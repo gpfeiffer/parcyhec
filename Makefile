@@ -1,6 +1,6 @@
 #GAP=../../gap-64/gap3-jm5/bin/gap.sh64
 GAP=../../gap-64/gap3-jm/bin/gap.sh
-MEM=-m 4000m
+MEM=-m 5000m
 LIB=hvec.g variants.g parcyhec.g
 
 LOGS = \
@@ -41,6 +41,9 @@ g33log.txt: g33input.g
 	${GAP} ${MEM} ${LIB} < $< | tee $@
 
 g33d4log.txt: g33d4input.g
+	${GAP} ${MEM} ${LIB} < $< | tee $@
+
+g34log.txt: g34input.g
 	${GAP} ${MEM} ${LIB} < $< | tee $@
 
 g34g33log.txt: g34g33input.g
